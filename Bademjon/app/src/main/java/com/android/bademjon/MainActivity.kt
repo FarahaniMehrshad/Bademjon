@@ -146,7 +146,7 @@ class MainActivity : ComponentActivity() {
 // bottom navigation bar with pages handler
 private val homeData = HomeDataModel()
 private val userData = UserDataModel()
-private var intentNull =false
+private var intentNull =mutableStateOf(false)
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -194,39 +194,31 @@ fun AppView(ChangeLanguage: ()-> Unit) {
 
 
     if(!CheckIntent()) {
-        if (userData.gender.value.toInt() == 0) {
 
-            homeData.receipt(10 * userData.weight.value.toInt())
-            homeData.burned(6 * userData.height.value.toInt())
-            homeData.leftOver(homeData.receipt.intValue - homeData.burned.intValue + 85)
-            homeData.leftOverProcess(Random.nextFloat())
-            homeData.fatProcess(Random.nextFloat())
-            homeData.proteinProcess(Random.nextFloat())
-            homeData.carboProcess(Random.nextFloat())
-            homeData.fat(3 * userData.height.value.toInt())
-            homeData.protein(9 * userData.weight.value.toInt())
-            homeData.carbo(15 * userData.height.value.toInt())
-            homeData.breakfast(4 * userData.weight.value.toInt())
-            homeData.lunch(5 * userData.height.value.toInt())
-            homeData.dinner(6 * userData.weight.value.toInt())
+        homeData.receipt(homeData.breakfast.intValue+homeData.lunch.intValue+homeData.dinner.intValue)
+        homeData.leftOver(homeData.receipt.intValue - homeData.burned.intValue)
+
+        homeData.leftOverProcess(GetFloat(homeData.burned.intValue,homeData.receipt.intValue))
+        homeData.fatProcess(GetFloat(homeData.fat.intValue,100))
+        homeData.proteinProcess(GetFloat(homeData.protein.intValue,100))
+        homeData.carboProcess(GetFloat(homeData.carbo.intValue,100))
+
+
+        // Male Gender
+        if (userData.gender.value.toInt() == 0) {
+            homeData.burned((homeData.receipt.intValue/5) * 2)
+
+            homeData.breakfast((homeData.protein.intValue) * ((userData.weight.value.toInt()+userData.height.value.toInt()) /8))
+            homeData.lunch((homeData.carbo.intValue) * ((userData.weight.value.toInt()+userData.height.value.toInt()) /12))
+            homeData.dinner((homeData.fat.intValue) * ((userData.weight.value.toInt()+userData.height.value.toInt()) /16))
 
         } else {
 
-            homeData.receipt(8 * userData.weight.value.toInt())
-            homeData.burned(5 * userData.height.value.toInt())
-            homeData.leftOver(homeData.receipt.intValue - homeData.burned.intValue + 85)
-            homeData.leftOverProcess(Random.nextFloat())
-            homeData.fatProcess(Random.nextFloat())
-            homeData.proteinProcess(Random.nextFloat())
-            homeData.carboProcess(Random.nextFloat())
-            homeData.fat(2 * userData.height.value.toInt())
-            homeData.protein(4 * userData.weight.value.toInt())
-            homeData.carbo(15 * userData.height.value.toInt())
-            homeData.breakfast(3 * userData.weight.value.toInt())
-            homeData.lunch(6 * userData.height.value.toInt())
-            homeData.dinner(8 * userData.weight.value.toInt())
+            homeData.burned((homeData.receipt.intValue/4) * 2)
 
-
+            homeData.breakfast((homeData.protein.intValue) * ((userData.weight.value.toInt()+userData.height.value.toInt()) /10))
+            homeData.lunch((homeData.carbo.intValue) * ((userData.weight.value.toInt()+userData.height.value.toInt()) /15))
+            homeData.dinner((homeData.fat.intValue) * ((userData.weight.value.toInt()+userData.height.value.toInt()) /20))
         }
     }
 
@@ -908,9 +900,9 @@ fun HomeView() {
             Spacer(modifier = Modifier.height(20.dp))
             Button(modifier = Modifier
                 .width(350.dp)
-                .height(60.dp),
+                .height(40.dp),
                 contentPadding = PaddingValues(0.dp),
-                onClick = { /*TODO*/ },
+                onClick = { AddProtein() },
                 shape = RoundedCornerShape(10.dp)) {
                 Image(
                     painter = painterResource(id = R.drawable.milk_carton),
@@ -939,9 +931,9 @@ fun HomeView() {
             Spacer(modifier = Modifier.height(20.dp))
             Button(modifier = Modifier
                 .width(350.dp)
-                .height(60.dp),
+                .height(40.dp),
                 contentPadding = PaddingValues(0.dp),
-                onClick = { /*TODO*/ },
+                onClick = { AddCarbo() },
                 shape = RoundedCornerShape(10.dp)) {
                 Image(
                     painter = painterResource(id = R.drawable.beef_burger),
@@ -970,9 +962,9 @@ fun HomeView() {
             Spacer(modifier = Modifier.height(20.dp))
             Button(modifier = Modifier
                 .width(350.dp)
-                .height(60.dp),
+                .height(40.dp),
                 contentPadding = PaddingValues(0.dp),
-                onClick = { /*TODO*/ },
+                onClick = { AddFat() },
                 shape = RoundedCornerShape(10.dp)) {
                 Image(
                     painter = painterResource(id = R.drawable.turkeycock),
@@ -991,6 +983,37 @@ fun HomeView() {
                 )
                 Image(
                     painter = painterResource(id = R.drawable.group),
+                    contentDescription = stringResource(id = R.string.app_name),
+                    modifier = Modifier
+                        .size(30.dp)
+                        .weight(1F),
+                    colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.secondary)
+                )
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(modifier = Modifier
+                .width(350.dp)
+                .height(40.dp),
+                contentPadding = PaddingValues(0.dp),
+                onClick = { DesAll() },
+                shape = RoundedCornerShape(10.dp)) {
+                Image(
+                    painter = painterResource(id = R.drawable.del),
+                    contentDescription = stringResource(id = R.string.app_name),
+                    modifier = Modifier
+                        .size(30.dp)
+                        .weight(1F),
+                    colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.secondary)
+                )
+                Text(modifier = Modifier
+                    .weight(7F),
+                    text=stringResource(id = R.string.clear)+" "+stringResource(id = R.string.calories),
+                    fontFamily = GetFont(),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.dec),
                     contentDescription = stringResource(id = R.string.app_name),
                     modifier = Modifier
                         .size(30.dp)
@@ -1228,7 +1251,7 @@ fun CheckIntent():Boolean{
         val uri= intent?.data
         val height= uri?.getQueryParameter("height")?.toInt()
         val weight= uri?.getQueryParameter("weight")?.toInt()
-        if(!intentNull && uri!=null && height!=null && weight!=null) {
+        if(!intentNull.value && uri!=null && height!=null && weight!=null) {
             homeData.receipt(10 * height)
             homeData.burned(6 * weight)
             homeData.leftOver(homeData.receipt.intValue - homeData.burned.intValue + 85)
@@ -1251,7 +1274,44 @@ fun CheckIntent():Boolean{
 
 @Composable
 fun ClearIntent() {
-    intentNull=true
+    intentNull.value=true
+}
+
+
+
+fun AddProtein() {
+    homeData.protein(homeData.protein.intValue+1)
+}
+
+
+fun AddCarbo() {
+    homeData.carbo(homeData.carbo.intValue+1)
+}
+
+
+fun AddFat() {
+    homeData.fat(homeData.fat.intValue+1)
+}
+
+
+fun DesAll() {
+    if(homeData.protein.intValue>0) homeData.protein(homeData.protein.intValue-1)
+    if(homeData.carbo.intValue>0) homeData.carbo(homeData.carbo.intValue-1)
+    if(homeData.fat.intValue>0) homeData.fat(homeData.fat.intValue-1)
+}
+
+
+@Composable
+fun GetFloat(min:Int,max:Int):Float {
+    if(min==0) return 0F
+    var min2:Float=min*1F
+    var max2:Float=max*1F
+    if(min2>=max2) max2=min2*1.5F
+
+    var one:Float=max2/100F
+    var one2:Float=1F/100F
+    var per:Float=min2/one
+    return per*one2
 }
 
 
